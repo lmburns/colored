@@ -31,14 +31,16 @@ Add this in your `Cargo.toml`:
 
 ```toml
 [dependencies]
-colored = "2"
+colored = { git = "https://github.com/lmburns/colored", branch = "master", features = ["serde", "rusqlite-sql"] }
+
+# Note:
+#   - `serde` allows for the `Serialize` and `Deserialize` attributes on `Color`
+#   - `rusqlite-sql` allows for `ToSql` and `FromSql` to be implemented on `Color`
 ```
 
 and add this to your `lib.rs` or `main.rs`:
 
 ```rust
-    extern crate colored; // not needed in Rust 2018
-
     use colored::*;
 
     // test the example with `cargo run --example most_simple`
