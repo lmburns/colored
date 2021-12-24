@@ -40,31 +40,31 @@ pub enum Styles {
 }
 
 impl Styles {
-    fn to_str<'a>(self) -> &'a str {
+    const fn to_str<'a>(self) -> &'a str {
         match self {
-            Styles::Clear => "", // unreachable, but we don't want to panic
-            Styles::Bold => "1",
-            Styles::Dimmed => "2",
-            Styles::Italic => "3",
-            Styles::Underline => "4",
-            Styles::Blink => "5",
-            Styles::Reversed => "7",
-            Styles::Hidden => "8",
-            Styles::Strikethrough => "9",
+            Self::Clear => "", // unreachable, but we don't want to panic
+            Self::Bold => "1",
+            Self::Dimmed => "2",
+            Self::Italic => "3",
+            Self::Underline => "4",
+            Self::Blink => "5",
+            Self::Reversed => "7",
+            Self::Hidden => "8",
+            Self::Strikethrough => "9",
         }
     }
 
-    fn to_u8(self) -> u8 {
+    const fn to_u8(self) -> u8 {
         match self {
-            Styles::Clear => CLEARV,
-            Styles::Bold => BOLD,
-            Styles::Dimmed => DIMMED,
-            Styles::Italic => ITALIC,
-            Styles::Underline => UNDERLINE,
-            Styles::Blink => BLINK,
-            Styles::Reversed => REVERSED,
-            Styles::Hidden => HIDDEN,
-            Styles::Strikethrough => STRIKETHROUGH,
+            Self::Clear => CLEARV,
+            Self::Bold => BOLD,
+            Self::Dimmed => DIMMED,
+            Self::Italic => ITALIC,
+            Self::Underline => UNDERLINE,
+            Self::Blink => BLINK,
+            Self::Reversed => REVERSED,
+            Self::Hidden => HIDDEN,
+            Self::Strikethrough => STRIKETHROUGH,
         }
     }
 
@@ -73,7 +73,7 @@ impl Styles {
             return None;
         }
 
-        let res: Vec<Styles> = STYLES
+        let res: Vec<Self> = STYLES
             .iter()
             .filter(|&&(ref mask, _)| (0 != (u & mask)))
             .map(|&(_, value)| value)
@@ -96,11 +96,14 @@ impl Style {
     /// assert_eq!(colored.style().contains(Styles::Italic), true);
     /// assert_eq!(colored.style().contains(Styles::Dimmed), false);
     /// ```
-    pub fn contains(self, style: Styles) -> bool {
+    #[inline]
+    #[must_use]
+    pub const fn contains(self, style: Styles) -> bool {
         let s = style.to_u8();
         self.0 & s == s
     }
 
+    /// Convert style to string
     pub(crate) fn to_str(self) -> String {
         let styles = Styles::from_u8(self.0).unwrap_or_default();
         styles
@@ -110,6 +113,7 @@ impl Style {
             .join(";")
     }
 
+    /// Combine styles
     pub(crate) fn add(&mut self, two: Styles) {
         self.0 |= two.to_u8();
     }
@@ -125,7 +129,7 @@ mod tests {
 
         #[test]
         fn empty_is_none() {
-            assert_eq!(None, Styles::from_u8(CLEARV))
+            assert_eq!(None, Styles::from_u8(CLEARV));
         }
     }
 

@@ -1,16 +1,19 @@
 //! A couple of functions to enable and disable coloring.
 
-use std::default::Default;
-use std::env;
-use std::sync::atomic::{AtomicBool, Ordering};
+use lazy_static::lazy_static;
+use std::{
+    default::Default,
+    env,
+    sync::atomic::{AtomicBool, Ordering},
+};
 
 /// Sets a flag to the console to use a virtual terminal environment.
 ///
-/// This is primarily used for Windows 10 environments which will not correctly colorize
-/// the outputs based on ANSI escape codes.
+/// This is primarily used for Windows 10 environments which will not correctly
+/// colorize the outputs based on ANSI escape codes.
 ///
-/// The returned `Result` is _always_ `Ok(())`, the return type was kept to ensure backwards
-/// compatibility.
+/// The returned `Result` is _always_ `Ok(())`, the return type was kept to
+/// ensure backwards compatibility.
 ///
 /// # Notes
 /// > Only available to `Windows` build targets.
@@ -19,10 +22,10 @@ use std::sync::atomic::{AtomicBool, Ordering};
 /// ```rust
 /// use colored::*;
 /// control::set_virtual_terminal(false).unwrap();
-/// println!("{}", "bright cyan".bright_cyan());	// will print '[96mbright cyan[0m' on windows 10
+/// println!("{}", "bright cyan".bright_cyan()); // will print '[96mbright cyan[0m' on windows 10
 ///
 /// control::set_virtual_terminal(true).unwrap();
-/// println!("{}", "bright cyan".bright_cyan());	// will print correctly
+/// println!("{}", "bright cyan".bright_cyan()); // will print correctly
 /// ```
 #[cfg(windows)]
 pub fn set_virtual_terminal(use_virtual: bool) -> Result<(), ()> {
@@ -46,13 +49,11 @@ pub fn set_virtual_terminal(use_virtual: bool) -> Result<(), ()> {
 
         match (use_virtual, enabled) {
             // not enabled, should be enabled
-            (true, false) => {
-                SetConsoleMode(handle, ENABLE_VIRTUAL_TERMINAL_PROCESSING | original_mode)
-            }
+            (true, false) =>
+                SetConsoleMode(handle, ENABLE_VIRTUAL_TERMINAL_PROCESSING | original_mode),
             // already enabled, should be disabled
-            (false, true) => {
-                SetConsoleMode(handle, ENABLE_VIRTUAL_TERMINAL_PROCESSING ^ original_mode)
-            }
+            (false, true) =>
+                SetConsoleMode(handle, ENABLE_VIRTUAL_TERMINAL_PROCESSING ^ original_mode),
             _ => 0,
         };
     }
@@ -62,37 +63,42 @@ pub fn set_virtual_terminal(use_virtual: bool) -> Result<(), ()> {
 
 /// A flag to to if coloring should occur.
 pub struct ShouldColorize {
-    clicolor: bool,
-    clicolor_force: Option<bool>,
+    /// `CLICOLOR` status
+    clicolor:            bool,
+    /// `CLICOLORFORCE` status
+    clicolor_force:      Option<bool>,
     // XXX we can't use Option<Atomic> because we can't use &mut references to ShouldColorize
     has_manual_override: AtomicBool,
-    manual_override: AtomicBool,
+    manual_override:     AtomicBool,
 }
 
-/// Use this to force colored to ignore the environment and always/never colorize
-/// See example/control.rs
+/// Use this to force colored to ignore the environment and always/never
+/// colorize See `example/control.rs`
+#[inline]
 pub fn set_override(override_colorize: bool) {
-    SHOULD_COLORIZE.set_override(override_colorize)
+    SHOULD_COLORIZE.set_override(override_colorize);
 }
 
-/// Remove the manual override and let the environment decide if it's ok to colorize
-/// See example/control.rs
+/// Remove the manual override and let the environment decide if it's ok to
+/// colorize See example/control.rs
+#[inline]
 pub fn unset_override() {
-    SHOULD_COLORIZE.unset_override()
+    SHOULD_COLORIZE.unset_override();
 }
 
 lazy_static! {
-/// The persistent [`ShouldColorize`].
+    /// The persistent [`ShouldColorize`].
     pub static ref SHOULD_COLORIZE: ShouldColorize = ShouldColorize::from_env();
 }
 
 impl Default for ShouldColorize {
-    fn default() -> ShouldColorize {
-        ShouldColorize {
-            clicolor: true,
-            clicolor_force: None,
+    #[inline]
+    fn default() -> Self {
+        Self {
+            clicolor:            true,
+            clicolor_force:      None,
             has_manual_override: AtomicBool::new(false),
-            manual_override: AtomicBool::new(false),
+            manual_override:     AtomicBool::new(false),
         }
     }
 }
@@ -102,19 +108,22 @@ impl ShouldColorize {
     /// whether colorization should be used or not.
     /// `CLICOLOR_FORCE` takes highest priority, followed by `NO_COLOR`,
     /// followed by `CLICOLOR` combined with tty check.
+    #[inline]
+    #[must_use]
     pub fn from_env() -> Self {
-        ShouldColorize {
-            clicolor: ShouldColorize::normalize_env(env::var("CLICOLOR")).unwrap_or(true)
+        Self {
+            clicolor: Self::normalize_env(env::var("CLICOLOR")).unwrap_or(true)
                 && atty::is(atty::Stream::Stdout),
-            clicolor_force: ShouldColorize::resolve_clicolor_force(
+            clicolor_force: Self::resolve_clicolor_force(
                 env::var("NO_COLOR"),
                 env::var("CLICOLOR_FORCE"),
             ),
-            ..ShouldColorize::default()
+            ..Self::default()
         }
     }
 
     /// Returns if the current coloring is expected.
+    #[inline]
     pub fn should_colorize(&self) -> bool {
         if self.has_manual_override.load(Ordering::Relaxed) {
             return self.manual_override.load(Ordering::Relaxed);
@@ -127,19 +136,23 @@ impl ShouldColorize {
         self.clicolor
     }
 
-    /// Use this to force colored to ignore the environment and always/never colorize
+    /// Use this to force colored to ignore the environment and always/never
+    /// colorize
+    #[inline]
     pub fn set_override(&self, override_colorize: bool) {
         self.has_manual_override.store(true, Ordering::Relaxed);
         self.manual_override
             .store(override_colorize, Ordering::Relaxed);
     }
 
-    /// Remove the manual override and let the environment decide if it's ok to colorize
+    /// Remove the manual override and let the environment decide if it's ok to
+    /// colorize
+    #[inline]
     pub fn unset_override(&self) {
         self.has_manual_override.store(false, Ordering::Relaxed);
     }
 
-    /* private */
+    // private
 
     fn normalize_env(env_res: Result<String, env::VarError>) -> Option<bool> {
         match env_res {
@@ -152,9 +165,9 @@ impl ShouldColorize {
         no_color: Result<String, env::VarError>,
         clicolor_force: Result<String, env::VarError>,
     ) -> Option<bool> {
-        if ShouldColorize::normalize_env(clicolor_force) == Some(true) {
+        if Self::normalize_env(clicolor_force) == Some(true) {
             Some(true)
-        } else if ShouldColorize::normalize_env(no_color).is_some() {
+        } else if Self::normalize_env(no_color).is_some() {
             Some(false)
         } else {
             None
@@ -165,8 +178,7 @@ impl ShouldColorize {
 #[cfg(test)]
 mod specs {
     use super::*;
-    use rspec;
-    use rspec::context::*;
+    use rspec::{self, context::*};
     use std::env;
 
     #[test]
@@ -185,7 +197,7 @@ mod specs {
                     assert_eq!(
                         None,
                         ShouldColorize::normalize_env(Err(env::VarError::NotUnicode("".into())))
-                    )
+                    );
                 });
 
                 ctx.it("should return Some(true) if != 0", || {
@@ -199,7 +211,8 @@ mod specs {
 
             ctx.describe("::resolve_clicolor_force", |ctx| {
                 ctx.it(
-                    "should return None if NO_COLOR is not set and CLICOLOR_FORCE is not set or set to 0",
+                    "should return None if NO_COLOR is not set and CLICOLOR_FORCE is not set or \
+                     set to 0",
                     || {
                         assert_eq!(
                             None,
@@ -219,7 +232,8 @@ mod specs {
                 );
 
                 ctx.it(
-                    "should return Some(false) if NO_COLOR is set and CLICOLOR_FORCE is not enabled",
+                    "should return Some(false) if NO_COLOR is set and CLICOLOR_FORCE is not \
+                     enabled",
                     || {
                         assert_eq!(
                             Some(false),
@@ -246,7 +260,8 @@ mod specs {
                 );
 
                 ctx.it(
-                    "should prioritize CLICOLOR_FORCE over NO_COLOR if CLICOLOR_FORCE is set to non-zero value",
+                    "should prioritize CLICOLOR_FORCE over NO_COLOR if CLICOLOR_FORCE is set to \
+                     non-zero value",
                     || {
                         assert_eq!(
                             Some(true),
@@ -285,23 +300,19 @@ mod specs {
 
             ctx.describe("when only changing clicolors", |ctx| {
                 ctx.it("clicolor == false means no colors", || {
-                    let colorize_control = ShouldColorize {
-                        clicolor: false,
-                        ..ShouldColorize::default()
-                    };
-                    false == colorize_control.should_colorize()
+                    let colorize_control =
+                        ShouldColorize { clicolor: false, ..ShouldColorize::default() };
+                    !colorize_control.should_colorize()
                 });
 
                 ctx.it("clicolor == true means colors !", || {
-                    let colorize_control = ShouldColorize {
-                        clicolor: true,
-                        ..ShouldColorize::default()
-                    };
-                    true == colorize_control.should_colorize()
+                    let colorize_control =
+                        ShouldColorize { clicolor: true, ..ShouldColorize::default() };
+                    colorize_control.should_colorize()
                 });
 
                 ctx.it("unset clicolors implies true", || {
-                    true == ShouldColorize::default().should_colorize()
+                    ShouldColorize::default().should_colorize()
                 });
             });
 
@@ -315,7 +326,7 @@ mod specs {
                             ..ShouldColorize::default()
                         };
 
-                        true == colorize_control.should_colorize()
+                        colorize_control.should_colorize()
                     },
                 );
 
@@ -328,35 +339,43 @@ mod specs {
                             ..ShouldColorize::default()
                         };
 
-                        false == colorize_control.should_colorize()
+                        !colorize_control.should_colorize()
                     },
                 );
             });
 
             ctx.describe("using a manual override", |ctx| {
-                ctx.it("shoud colorize if manual_override is true, but clicolor is false and clicolor_force also false", || {
-                    let colorize_control = ShouldColorize {
-                        clicolor: false,
-                        clicolor_force: None,
-                        has_manual_override: AtomicBool::new(true),
-                        manual_override: AtomicBool::new(true),
-                        .. ShouldColorize::default()
-                    };
+                ctx.it(
+                    "shoud colorize if manual_override is true, but clicolor is false and \
+                     clicolor_force also false",
+                    || {
+                        let colorize_control = ShouldColorize {
+                            clicolor: false,
+                            clicolor_force: None,
+                            has_manual_override: AtomicBool::new(true),
+                            manual_override: AtomicBool::new(true),
+                            ..ShouldColorize::default()
+                        };
 
-                    true == colorize_control.should_colorize()
-                });
+                        colorize_control.should_colorize()
+                    },
+                );
 
-                ctx.it("should not colorize if manual_override is false, but clicolor is true or clicolor_force is true", || {
-                    let colorize_control = ShouldColorize {
-                        clicolor: true,
-                        clicolor_force: Some(true),
-                        has_manual_override: AtomicBool::new(true),
-                        manual_override: AtomicBool::new(false),
-                        .. ShouldColorize::default()
-                    };
+                ctx.it(
+                    "should not colorize if manual_override is false, but clicolor is true or \
+                     clicolor_force is true",
+                    || {
+                        let colorize_control = ShouldColorize {
+                            clicolor: true,
+                            clicolor_force: Some(true),
+                            has_manual_override: AtomicBool::new(true),
+                            manual_override: AtomicBool::new(false),
+                            ..ShouldColorize::default()
+                        };
 
-                    false == colorize_control.should_colorize()
-                })
+                        false == colorize_control.should_colorize()
+                    },
+                );
             });
 
             ctx.describe("::set_override", |ctx| {

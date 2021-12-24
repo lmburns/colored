@@ -1,7 +1,8 @@
 [package]
 name = "colored"
 description = "The most simple way to add colors in your terminal"
-version = "2.0.0"
+version = "2.0.2"
+edition = "2021"
 authors = ["Thomas Wickham <mackwic@gmail.com>"]
 license = "MPL-2.0"
 homepage = "https://github.com/mackwic/colored"
@@ -13,20 +14,20 @@ keywords = ["color", "string", "term", "ansi_term", "term-painter"]
 # with this feature, no color will ever be written
 no-color = []
 serde = ["serde_crate/derive"]
+rusqlite-sql = ["rusqlite"]
+# default = ["serde", "rusqlite-sql"]
 
 [dependencies]
 atty = "0.2"
 lazy_static = "1"
 serde_crate = { package = "serde", version = "1", optional = true }
+rusqlite = { version = "0.26.3", optional = true }
+
 
 [target.'cfg(windows)'.dependencies.winapi]
 version = "0.3"
 default-features = false
-features = [
-    "consoleapi",
-    "processenv",
-    "winbase"
-]
+features = ["consoleapi", "processenv", "winbase"]
 
 [dev_dependencies]
 ansi_term = "0.12"
