@@ -5,8 +5,8 @@ version = "2.0.2"
 edition = "2021"
 authors = ["Thomas Wickham <mackwic@gmail.com>"]
 license = "MPL-2.0"
-homepage = "https://github.com/mackwic/colored"
-repository = "https://github.com/mackwic/colored"
+homepage = "https://github.com/lmburns/colored"
+repository = "https://github.com/lmburns/colored"
 readme = "README.md"
 keywords = ["color", "string", "term", "ansi_term", "term-painter"]
 

@@ -268,7 +268,9 @@ impl FromStr for Color {
 }
 
 #[cfg(feature = "rusqlite-sql")]
+/// Allow for the conversion of `Color` to `rusqlite` types
 pub mod sql {
+    use super::*;
     use rusqlite::types::{
         FromSql,
         FromSqlError,
@@ -302,7 +304,6 @@ pub mod sql {
         }
     }
 }
-
 
 /// Convert a byte to a hex value
 const fn hex_val(ch: u8) -> u8 {
