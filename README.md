@@ -5,10 +5,10 @@ Status](https://travis-ci.org/mackwic/colored.svg?branch=master)](https://travis
 
 ### Fork
 This fork adds:
-    - Support for [`serde`](https://github.com/serde-rs/serde) serialization and deserialization
-        - Feature = `serde`
-    - Support for [`rusqlite`](https://github.com/rusqlite/rusqlite) serialization and deserialization using `FromSql` and `ToSql` traits
-        - Feature = `rusqlite-sql`
+* Support for [`serde`](https://github.com/serde-rs/serde) serialization and deserialization
+    * Feature = `serde`
+* Support for [`rusqlite`](https://github.com/rusqlite/rusqlite) serialization and deserialization using `FromSql` and `ToSql` traits
+    * Feature = `rusqlite-sql`
 
 Coloring terminal so simple, you already know how to do it!
 
