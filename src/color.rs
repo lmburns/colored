@@ -159,7 +159,7 @@ impl Color {
         }
     }
 
-    /// Covnert a [`Color`] to one hex string
+    /// Convert a [`Color`] to one hex string
     #[inline]
     #[must_use]
     pub fn to_hex(&self) -> String {
@@ -223,6 +223,16 @@ impl Color {
                 color.to_owned()
             ),
         ))
+    }
+
+    /// Create a new [`Color::TrueColor`] without an explicit instantiation of
+    /// the struct. This is meant to be used as a shortcut for
+    ///
+    /// ```rust
+    /// Color::TrueColor { r: 255, g: 44, b: 211 }
+    /// ```
+    pub fn truecolor(r: u8, g: u8, b: u8) -> Self {
+        Self::TrueColor { r, g, b }
     }
 }
 
