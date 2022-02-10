@@ -177,8 +177,8 @@ impl ShouldColorize {
 
 #[cfg(test)]
 mod specs {
-    use super::*;
-    use rspec::{self, context::*};
+    use super::{AtomicBool, Default, Ordering, ShouldColorize};
+    use rspec::{self, context::describe};
     use std::env;
 
     #[test]
@@ -293,6 +293,7 @@ mod specs {
                     ShouldColorize::default();
                 });
 
+                #[allow(unused_must_use)]
                 ctx.it("should have an environment constructor", || {
                     ShouldColorize::from_env();
                 });
@@ -350,11 +351,10 @@ mod specs {
                      clicolor_force also false",
                     || {
                         let colorize_control = ShouldColorize {
-                            clicolor: false,
-                            clicolor_force: None,
+                            clicolor:            false,
+                            clicolor_force:      None,
                             has_manual_override: AtomicBool::new(true),
-                            manual_override: AtomicBool::new(true),
-                            ..ShouldColorize::default()
+                            manual_override:     AtomicBool::new(true),
                         };
 
                         colorize_control.should_colorize()
@@ -366,14 +366,13 @@ mod specs {
                      clicolor_force is true",
                     || {
                         let colorize_control = ShouldColorize {
-                            clicolor: true,
-                            clicolor_force: Some(true),
+                            clicolor:            true,
+                            clicolor_force:      Some(true),
                             has_manual_override: AtomicBool::new(true),
-                            manual_override: AtomicBool::new(false),
-                            ..ShouldColorize::default()
+                            manual_override:     AtomicBool::new(false),
                         };
 
-                        false == colorize_control.should_colorize()
+                        !colorize_control.should_colorize()
                     },
                 );
             });
@@ -388,21 +387,15 @@ mod specs {
                     let colorize_control = ShouldColorize::default();
                     colorize_control.set_override(true);
                     {
-                        assert_eq!(
-                            true,
-                            colorize_control.has_manual_override.load(Ordering::Relaxed)
-                        );
+                        assert!(colorize_control.has_manual_override.load(Ordering::Relaxed));
                         let val = colorize_control.manual_override.load(Ordering::Relaxed);
-                        assert_eq!(true, val);
+                        assert!(val);
                     }
                     colorize_control.set_override(false);
                     {
-                        assert_eq!(
-                            true,
-                            colorize_control.has_manual_override.load(Ordering::Relaxed)
-                        );
+                        assert!(colorize_control.has_manual_override.load(Ordering::Relaxed));
                         let val = colorize_control.manual_override.load(Ordering::Relaxed);
-                        assert_eq!(false, val);
+                        assert!(!val);
                     }
                 });
             });
@@ -417,10 +410,7 @@ mod specs {
                     let colorize_control = ShouldColorize::default();
                     colorize_control.set_override(true);
                     colorize_control.unset_override();
-                    assert_eq!(
-                        false,
-                        colorize_control.has_manual_override.load(Ordering::Relaxed)
-                    );
+                    assert!(!colorize_control.has_manual_override.load(Ordering::Relaxed));
                 });
             });
         });

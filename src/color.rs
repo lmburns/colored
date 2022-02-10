@@ -1,6 +1,6 @@
 //! Standard colors for the command line and methods regarding them
 
-use std::{borrow::Cow, io, str::FromStr};
+use std::{borrow::Cow, io, str::FromStr, cmp::Ordering};
 
 // TODO: Add 256-ANSI support
 
@@ -231,8 +231,21 @@ impl Color {
     /// ```rust
     /// Color::TrueColor { r: 255, g: 44, b: 211 }
     /// ```
-    pub fn truecolor(r: u8, g: u8, b: u8) -> Self {
+    #[must_use]
+    pub const fn truecolor(r: u8, g: u8, b: u8) -> Self {
         Self::TrueColor { r, g, b }
+    }
+}
+
+impl PartialOrd for Color {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering>{
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Color {
+    fn cmp(&self, other: &Self) -> Ordering {
+        (self.to_hex_array()).cmp(&other.to_hex_array())
     }
 }
 

@@ -558,7 +558,7 @@ impl Deref for ColoredString {
 impl<'a> From<&'a str> for ColoredString {
     #[inline]
     fn from(s: &'a str) -> Self {
-        ColoredString { input: String::from(s), ..ColoredString::default() }
+        Self { input: String::from(s), ..Self::default() }
     }
 }
 
@@ -577,7 +577,7 @@ impl Colorize for ColoredString {
 
     #[inline]
     fn clear(self) -> ColoredString {
-        ColoredString { input: self.input, ..ColoredString::default() }
+        Self { input: self.input, ..Self::default() }
     }
 
     #[inline]
@@ -747,7 +747,7 @@ mod tests {
         assert_eq!(
             format!("{:1.1}", "toto".blue()).len(),
             format!("{:1.1}", "1".blue()).len()
-        )
+        );
     }
 
     #[test]
@@ -939,22 +939,22 @@ mod tests {
 
     #[test]
     fn color_fn() {
-        assert_eq!("blue".blue(), "blue".color("blue"))
+        assert_eq!("blue".blue(), "blue".color("blue"));
     }
 
     #[test]
     fn on_color_fn() {
-        assert_eq!("blue".on_blue(), "blue".on_color("blue"))
+        assert_eq!("blue".on_blue(), "blue".on_color("blue"));
     }
 
     #[test]
     fn bright_color_fn() {
-        assert_eq!("blue".bright_blue(), "blue".color("bright blue"))
+        assert_eq!("blue".bright_blue(), "blue".color("bright blue"));
     }
 
     #[test]
     fn on_bright_color_fn() {
-        assert_eq!("blue".on_bright_blue(), "blue".on_color("bright blue"))
+        assert_eq!("blue".on_bright_blue(), "blue".on_color("bright blue"));
     }
 
     #[test]
@@ -974,8 +974,8 @@ mod tests {
         let cstring = cstring.bold().italic();
         assert_eq!(cstring.fgcolor(), Some(Color::Blue));
         assert_eq!(cstring.bgcolor(), Some(Color::BrightYellow));
-        assert_eq!(cstring.style().contains(Styles::Bold), true);
-        assert_eq!(cstring.style().contains(Styles::Italic), true);
-        assert_eq!(cstring.style().contains(Styles::Dimmed), false);
+        assert!(cstring.style().contains(Styles::Bold));
+        assert!(cstring.style().contains(Styles::Italic));
+        assert!(!cstring.style().contains(Styles::Dimmed));
     }
 }
