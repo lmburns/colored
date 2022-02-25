@@ -137,16 +137,18 @@ impl Color {
     ///     further processed
     ///   - If the color did not have a bright variant, it is the same hex color
     ///     as the original
+    ///   - These **will not** be the same as the `fg_str`, which produces an ansi
+    ///     sequence which will be interpreted by the terminal
     #[inline]
     #[must_use]
     pub const fn to_hex_array(&self) -> [u8; 3] {
         match *self {
             Self::Black => [0x00, 0x00, 0x00],
             Self::Red => [0xFF, 0x00, 0x00],
-            Self::Green => [0x00, 0xFF, 0x00],
-            Self::Blue => [0x00, 0x00, 0xff],
+            Self::Green => [0x00, 0x80, 0x00],
+            Self::Blue => [0x00, 0x00, 0xFF],
             Self::Yellow | Self::BrightYellow => [0xFF, 0xFF, 0x00],
-            Self::Magenta => [0xff, 0x00, 0xff],
+            Self::Magenta => [0xFF, 0x00, 0xFF],
             Self::Cyan => [0x00, 0xFF, 0xFF],
             Self::White | Self::BrightWhite => [0xFF, 0xFF, 0xFF],
             Self::BrightBlack => [0x22, 0x20, 0x24],
