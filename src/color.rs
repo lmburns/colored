@@ -147,14 +147,15 @@ impl Color {
             Self::Red => [0xFF, 0x00, 0x00],
             Self::Green => [0x00, 0x80, 0x00],
             Self::Blue => [0x00, 0x00, 0xFF],
-            Self::Yellow | Self::BrightYellow => [0xFF, 0xFF, 0x00],
+            Self::Yellow => [0xFF, 0xFF, 0x00],
             Self::Magenta => [0xFF, 0x00, 0xFF],
             Self::Cyan => [0x00, 0xFF, 0xFF],
             Self::White | Self::BrightWhite => [0xFF, 0xFF, 0xFF],
             Self::BrightBlack => [0x22, 0x20, 0x24],
             Self::BrightRed => [0xFF, 0x16, 0x0C],
-            Self::BrightGreen => [0xAA, 0xFF, 0x00],
-            Self::BrightBlue => [0x00, 0x96, 0xFF],
+            Self::BrightGreen => [0x32, 0xCD, 0x32],
+            Self::BrightBlue => [0xAD, 0xD8, 0xE6],
+            Self::BrightYellow => [0xFF, 0xFF, 0xE0],
             Self::BrightMagenta => [0xFF, 0x00, 0xCD],
             Self::BrightCyan => [0xE0, 0xFF, 0xFF],
             Self::TrueColor { r, g, b } => [r, g, b],
@@ -195,11 +196,6 @@ impl Color {
         macro_rules! if_6 {
             ($c:ident) => {
                 ($c.len() == 6).then(|| $c)
-                // if $c.len() == 6 {
-                //     Some($c)
-                // } else {
-                //     None
-                // }
             };
         }
 
