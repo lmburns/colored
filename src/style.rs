@@ -19,7 +19,7 @@ static STYLES: [(u8, Styles); 8] = [
     (STRIKETHROUGH, Styles::Strikethrough),
 ];
 
-pub static CLEAR: Style = Style(CLEARV);
+pub(crate) static CLEAR: Style = Style(CLEARV);
 
 /// A combinatorial style such as bold, italics, dimmed, etc.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -68,14 +68,14 @@ impl Styles {
         }
     }
 
-    fn from_u8(u: u8) -> Option<Vec<Styles>> {
+    fn from_u8(u: u8) -> Option<Vec<Self>> {
         if u == CLEARV {
             return None;
         }
 
         let res: Vec<Self> = STYLES
             .iter()
-            .filter(|&&(ref mask, _)| (0 != (u & mask)))
+            .filter(|(mask, _)| (0 != (u & mask)))
             .map(|&(_, value)| value)
             .collect();
         if res.is_empty() {
@@ -124,8 +124,7 @@ mod tests {
     use super::*;
 
     mod u8_to_styles_invalid_is_none {
-        use super::super::Styles;
-        use super::super::CLEARV;
+        use super::super::{Styles, CLEARV};
 
         #[test]
         fn empty_is_none() {
@@ -134,9 +133,16 @@ mod tests {
     }
 
     mod u8_to_styles_isomorphism {
-        use super::super::Styles;
         use super::super::{
-            BLINK, BOLD, DIMMED, HIDDEN, ITALIC, REVERSED, STRIKETHROUGH, UNDERLINE,
+            Styles,
+            BLINK,
+            BOLD,
+            DIMMED,
+            HIDDEN,
+            ITALIC,
+            REVERSED,
+            STRIKETHROUGH,
+            UNDERLINE,
         };
 
         macro_rules! value_isomorph {
@@ -176,8 +182,7 @@ mod tests {
     }
 
     mod styles_combine_complex {
-        use super::super::Styles::*;
-        use super::super::{Style, Styles};
+        use super::super::{Style, Styles, Styles::*};
 
         fn style_from_multiples(styles: &[Styles]) -> Style {
             let mut res = Style(styles[0].to_u8());
@@ -191,7 +196,8 @@ mod tests {
             ($styles:expr, $expect:expr) => {{
                 let v = style_from_multiples($styles);
                 let r = Styles::from_u8(v.0).expect("should find styles");
-                assert_eq!(&$expect as &[Styles], &r[..])
+                let e: &[Styles] = &$expect;
+                assert_eq!(e, &r[..])
             }};
         }
 
@@ -209,7 +215,7 @@ mod tests {
 
         #[test]
         fn aggreg3() {
-            let styles: &[Styles] = &[Bold, Italic, Bold];
+            let styles: &[Styles; 3] = &[Bold, Italic, Bold];
             test_aggreg!(styles, [Bold, Italic])
         }
 

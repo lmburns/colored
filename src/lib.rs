@@ -25,15 +25,110 @@
 //! See [the `Colorize` trait](./trait.Colorize.html) for all the methods.
 
 #![warn(missing_docs)]
+#![deny(
+    clippy::all,
+    // clippy::cargo,
+    clippy::complexity,
+    clippy::correctness,
+    clippy::nursery,
+    clippy::pedantic,
+    clippy::perf,
+    // clippy::restriction,
+    clippy::style,
+    absolute_paths_not_starting_with_crate,
+    anonymous_parameters,
+    bad_style,
+    // dead_code,
+    ellipsis_inclusive_range_patterns,
+    exported_private_dependencies,
+    ill_formed_attribute_input,
+    improper_ctypes,
+    keyword_idents,
+    macro_use_extern_crate,
+    meta_variable_misuse,
+    missing_abi,
+    // missing_debug_implementations,
+    missing_docs,
+    no_mangle_generic_items,
+    non_shorthand_field_patterns,
+    noop_method_call,
+    overflowing_literals,
+    path_statements,
+    patterns_in_fns_without_body,
+    pointer_structural_match,
+    private_in_public,
+    pub_use_of_private_extern_crate,
+    semicolon_in_expressions_from_macros,
+    single_use_lifetimes,
+    trivial_casts,
+    trivial_numeric_casts,
+    unconditional_recursion,
+    unreachable_pub,
+    // unsafe_code,
+    // unused,
+    // unused_allocation,
+    // unused_comparisons,
+    // unused_extern_crates,
+    // unused_import_braces,
+    // unused_lifetimes,
+    // unused_parens,
+    // unused_qualifications,
+    variant_size_differences,
+    while_true
+)]
+#![allow(
+    // Fill out documentation
+    // clippy::missing_docs_in_private_items,
+
+    // Find this problem
+    clippy::pattern_type_mismatch,
+
+    // ?
+    clippy::redundant_pub_crate,
+
+    clippy::as_conversions,
+    clippy::blanket_clippy_restriction_lints,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss,
+    clippy::cognitive_complexity,
+    clippy::create_dir,
+    clippy::doc_markdown,
+    clippy::else_if_without_else,
+    clippy::exhaustive_enums,
+    clippy::exhaustive_structs,
+    clippy::expect_used,
+    clippy::exit,
+    clippy::implicit_return,
+    clippy::indexing_slicing,
+    clippy::integer_arithmetic,
+    clippy::integer_division,
+    clippy::mod_module_files,
+    clippy::multiple_inherent_impl,
+    clippy::obfuscated_if_else,
+    clippy::separated_literal_suffix,
+    clippy::shadow_reuse,
+    clippy::shadow_same,
+    clippy::shadow_unrelated,
+    clippy::similar_names,
+    clippy::string_add,
+    clippy::string_slice,
+    clippy::struct_excessive_bools,
+    clippy::too_many_lines,
+    clippy::upper_case_acronyms,
+    clippy::unreachable,
+    clippy::unwrap_in_result
+    // clippy::single_match_else,
+)]
 
 mod color;
 pub mod control;
 mod style;
+use std::{borrow::Cow, fmt, ops::Deref};
+
 pub use crate::{
     color::*,
     style::{Style, Styles},
 };
-use std::{borrow::Cow, fmt, ops::Deref};
 
 /// A string that may have color and/or style applied to it.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -460,7 +555,7 @@ impl ColoredString {
     /// Should the text be colorized?
     #[cfg(feature = "no-color")]
     #[allow(clippy::unused_self)]
-    fn has_colors(&self) -> bool {
+    const fn has_colors(&self) -> bool {
         false
     }
 
@@ -558,7 +653,10 @@ impl Deref for ColoredString {
 impl<'a> From<&'a str> for ColoredString {
     #[inline]
     fn from(s: &'a str) -> Self {
-        Self { input: String::from(s), ..Self::default() }
+        Self {
+            input: String::from(s),
+            ..Self::default()
+        }
     }
 }
 
@@ -577,7 +675,10 @@ impl Colorize for ColoredString {
 
     #[inline]
     fn clear(self) -> ColoredString {
-        Self { input: self.input, ..Self::default() }
+        Self {
+            input: self.input,
+            ..Self::default()
+        }
     }
 
     #[inline]
@@ -914,8 +1015,7 @@ mod tests {
 
     #[cfg_attr(feature = "no-color", ignore)]
     #[test]
-    fn escape_reset_sequence_spec_should_replace_multiple_inner_reset_sequences_with_current_style()
-    {
+    fn escape_reset_sequence_spec_should_replace_multiple_inner_reset_sequences_with_current_style() {
         let italic_str = String::from("yo").italic();
         let input = format!(
             "start 1:{} 2:{} 3:{} end",

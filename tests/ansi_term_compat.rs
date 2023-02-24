@@ -1,11 +1,8 @@
-#![cfg(not(feature = "no-color"))]
+// #![cfg(not(feature = "no-color"))]
 #![allow(unused_imports)]
 
-extern crate ansi_term;
-extern crate colored;
-
-use ansi_term::*;
-use colored::*;
+use ansi_term::Colour;
+use colored::Colorize;
 
 macro_rules! test_simple_color {
     ($string:expr, $colored_name:ident, $ansi_term_name:ident) => {
@@ -21,8 +18,7 @@ macro_rules! test_simple_color {
 }
 
 mod compat_colors {
-    use super::ansi_term::*;
-    use super::colored::*;
+    use super::{Colour, Colorize};
 
     test_simple_color!("test string", black, Black);
     test_simple_color!("test string", red, Red);
@@ -35,31 +31,28 @@ mod compat_colors {
 }
 
 macro_rules! test_simple_style {
-    ($string:expr, $style:ident) => {
+    ($string:expr, $colored_style:ident, $ansi_style:ident) => {
         #[test]
-        fn $style() {
+        fn $colored_style() {
             let s = format!("{} {}", $string, stringify!($style));
             assert_eq!(
-                s.$style().to_string(),
-                ansi_term::Style::new().$style().paint(s).to_string()
+                s.$colored_style().to_string(),
+                ansi_term::Style::new().$ansi_style().paint(s).to_string()
             )
         }
     };
 }
 
 mod compat_styles {
-    use super::ansi_term;
-    use super::ansi_term::*;
-    use super::colored;
-    use super::colored::*;
+    use super::{Colour, Colorize};
 
-    test_simple_style!("test string", bold);
-    test_simple_style!("test string", dimmed);
-    test_simple_style!("test string", italic);
-    test_simple_style!("test string", underline);
-    test_simple_style!("test string", blink);
-    test_simple_style!("test string", reverse);
-    test_simple_style!("test string", hidden);
+    test_simple_style!("test string", bold, bold);
+    test_simple_style!("test string", dimmed, dimmed);
+    test_simple_style!("test string", italic, italic);
+    test_simple_style!("test string", underline, underline);
+    test_simple_style!("test string", blink, blink);
+    test_simple_style!("test string", reversed, reverse);
+    test_simple_style!("test string", hidden, hidden);
 }
 
 macro_rules! test_simple_bgcolor {
@@ -79,10 +72,7 @@ macro_rules! test_simple_bgcolor {
 }
 
 mod compat_bgcolors {
-    use super::ansi_term;
-    use super::ansi_term::*;
-    use super::colored;
-    use super::colored::*;
+    use super::{Colour, Colorize};
 
     test_simple_bgcolor!("test string", on_black, Black);
     test_simple_bgcolor!("test string", on_red, Red);
@@ -95,10 +85,7 @@ mod compat_bgcolors {
 }
 
 mod compat_complex {
-    use super::ansi_term;
-    use super::ansi_term::*;
-    use super::colored;
-    use super::colored::*;
+    use super::{Colour, Colorize};
 
     #[test]
     fn complex1() {
@@ -122,10 +109,7 @@ mod compat_complex {
 }
 
 mod compat_overrides {
-    use super::ansi_term;
-    use super::ansi_term::*;
-    use super::colored;
-    use super::colored::*;
+    use super::{Colour, Colorize};
 
     #[test]
     fn overrides1() {

@@ -1,4 +1,3 @@
-
 use color::Color;
 use style::Style;
 

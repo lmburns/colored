@@ -1,9 +1,8 @@
 //! Standard colors for the command line and methods regarding them
 
-use std::{borrow::Cow, io, str::FromStr, cmp::Ordering};
+use std::{borrow::Cow, cmp::Ordering, io, str::FromStr};
 
 // TODO: Add 256-ANSI support
-
 #[cfg(feature = "serde")]
 use serde_crate::{Deserialize, Serialize};
 
@@ -42,23 +41,23 @@ impl Color {
     #[must_use]
     pub fn to_fg_str(&self) -> Cow<'static, str> {
         match *self {
-            Color::Black => "30".into(),
-            Color::Red => "31".into(),
-            Color::Green => "32".into(),
-            Color::Yellow => "33".into(),
-            Color::Blue => "34".into(),
-            Color::Magenta => "35".into(),
-            Color::Cyan => "36".into(),
-            Color::White => "37".into(),
-            Color::BrightBlack => "90".into(),
-            Color::BrightRed => "91".into(),
-            Color::BrightGreen => "92".into(),
-            Color::BrightYellow => "93".into(),
-            Color::BrightBlue => "94".into(),
-            Color::BrightMagenta => "95".into(),
-            Color::BrightCyan => "96".into(),
-            Color::BrightWhite => "97".into(),
-            Color::TrueColor { r, g, b } => format!("38;2;{};{};{}", r, g, b).into(),
+            Self::Black => "30".into(),
+            Self::Red => "31".into(),
+            Self::Green => "32".into(),
+            Self::Yellow => "33".into(),
+            Self::Blue => "34".into(),
+            Self::Magenta => "35".into(),
+            Self::Cyan => "36".into(),
+            Self::White => "37".into(),
+            Self::BrightBlack => "90".into(),
+            Self::BrightRed => "91".into(),
+            Self::BrightGreen => "92".into(),
+            Self::BrightYellow => "93".into(),
+            Self::BrightBlue => "94".into(),
+            Self::BrightMagenta => "95".into(),
+            Self::BrightCyan => "96".into(),
+            Self::BrightWhite => "97".into(),
+            Self::TrueColor { r, g, b } => format!("38;2;{r};{g};{b}").into(),
         }
     }
 
@@ -67,23 +66,23 @@ impl Color {
     #[must_use]
     pub fn to_bg_str(&self) -> Cow<'static, str> {
         match *self {
-            Color::Black => "40".into(),
-            Color::Red => "41".into(),
-            Color::Green => "42".into(),
-            Color::Yellow => "43".into(),
-            Color::Blue => "44".into(),
-            Color::Magenta => "45".into(),
-            Color::Cyan => "46".into(),
-            Color::White => "47".into(),
-            Color::BrightBlack => "100".into(),
-            Color::BrightRed => "101".into(),
-            Color::BrightGreen => "102".into(),
-            Color::BrightYellow => "103".into(),
-            Color::BrightBlue => "104".into(),
-            Color::BrightMagenta => "105".into(),
-            Color::BrightCyan => "106".into(),
-            Color::BrightWhite => "107".into(),
-            Color::TrueColor { r, g, b } => format!("48;2;{};{};{}", r, g, b).into(),
+            Self::Black => "40".into(),
+            Self::Red => "41".into(),
+            Self::Green => "42".into(),
+            Self::Yellow => "43".into(),
+            Self::Blue => "44".into(),
+            Self::Magenta => "45".into(),
+            Self::Cyan => "46".into(),
+            Self::White => "47".into(),
+            Self::BrightBlack => "100".into(),
+            Self::BrightRed => "101".into(),
+            Self::BrightGreen => "102".into(),
+            Self::BrightYellow => "103".into(),
+            Self::BrightBlue => "104".into(),
+            Self::BrightMagenta => "105".into(),
+            Self::BrightCyan => "106".into(),
+            Self::BrightWhite => "107".into(),
+            Self::TrueColor { r, g, b } => format!("48;2;{r};{g};{b}").into(),
         }
     }
 
@@ -112,7 +111,7 @@ impl Color {
             "95" => Some(Self::BrightMagenta),
             "96" => Some(Self::BrightCyan),
             "97" => Some(Self::BrightWhite),
-            color =>
+            color => {
                 if color.starts_with("38;2;") {
                     let mut it = s.split(';');
                     it.next()?;
@@ -124,7 +123,8 @@ impl Color {
                     })
                 } else {
                     None
-                },
+                }
+            },
         }
     }
 
@@ -137,8 +137,8 @@ impl Color {
     ///     further processed
     ///   - If the color did not have a bright variant, it is the same hex color
     ///     as the original
-    ///   - These **will not** be the same as the `fg_str`, which produces an ansi
-    ///     sequence which will be interpreted by the terminal
+    ///   - These **will not** be the same as the `fg_str`, which produces an
+    ///     ansi sequence which will be interpreted by the terminal
     #[inline]
     #[must_use]
     pub const fn to_hex_array(&self) -> [u8; 3] {
@@ -171,7 +171,7 @@ impl Color {
         let arr = self.to_hex_array();
         let mut s = String::with_capacity(arr.len() * 2);
         for x in arr {
-            write!(&mut s, "{:02x}", x).expect("failed to write character to hex");
+            write!(&mut s, "{x:02x}").expect("failed to write character to hex");
         }
         s
     }
@@ -199,13 +199,14 @@ impl Color {
             };
         }
 
-        let result = if let Some(c) = color.strip_prefix("0x") {
-            if_6!(c)
-        } else if let Some(c) = color.strip_prefix('#') {
-            if_6!(c)
-        } else {
-            if_6!(color)
-        };
+        let result = color.strip_prefix("0x").map_or_else(
+            || {
+                color
+                    .strip_prefix('#')
+                    .map_or_else(|| if_6!(color), |c| if_6!(c))
+            },
+            |c| if_6!(c),
+        );
 
         if let Some(color) = result {
             // hex
@@ -227,7 +228,10 @@ impl Color {
     /// the struct. This is meant to be used as a shortcut for
     ///
     /// ```rust
-    /// Color::TrueColor { r: 255, g: 44, b: 211 }
+    /// # use colored::Color;
+    /// let c = Color::TrueColor { r: 255, g: 44, b: 211 };
+    /// let b = Color::truecolor(255, 44, 211);
+    /// assert_eq!(c, b);
     /// ```
     #[must_use]
     pub const fn truecolor(r: u8, g: u8, b: u8) -> Self {
@@ -236,7 +240,7 @@ impl Color {
 }
 
 impl PartialOrd for Color {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering>{
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
@@ -291,16 +295,9 @@ impl FromStr for Color {
 #[cfg(feature = "rusqlite-sql")]
 /// Allow for the conversion of `Color` to `rusqlite` types
 pub mod sql {
-    use super::*;
-    use rusqlite::types::{
-        FromSql,
-        FromSqlError,
-        FromSqlResult,
-        ToSql,
-        ToSqlOutput,
-        Value,
-        ValueRef,
-    };
+    use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ToSql, ToSqlOutput, Value, ValueRef};
+
+    use super::Color;
 
     impl ToSql for Color {
         #[inline]
